@@ -8,7 +8,9 @@ export const App = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-purple-600">
       <header className="py-4">
-        <h1 className="font-bold text-4xl text-center">Shuffle</h1>
+        <h1 className="font-bold text-4xl text-center">
+          <a href="/">Shuffle</a>
+        </h1>
       </header>
       <main className="flex flex-col flex-grow">
         <div className="w-full max-w-3xl py-8 mx-auto">
