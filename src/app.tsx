@@ -12,10 +12,19 @@ export const App = () => {
       </header>
       <main className="flex flex-col flex-grow">
         <div className="w-full max-w-3xl py-8 mx-auto">
-          <p className="font-bold text-center">
-            左の入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
-          </p>
-          <div className="flex justify-between items-center mt-4">
+          <div className="p-4 border-2 border-purple-600 rounded">
+            <div className="font-bold">使い方</div>
+            <ul className="list-disc list-inside text-sm mt-2 ml-4">
+              <li>
+                左の入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
+              </li>
+              <li>
+                <code>?q=hoge-huga</code>&nbsp;
+                のようなクエリパラメータ付きでURLを開くと初期値が設定されます（ハイフン区切り）
+              </li>
+            </ul>
+          </div>
+          <div className="flex justify-between items-center mt-8">
             <div>
               <label for="input" className="font-bold">
                 入力
@@ -72,7 +81,15 @@ export const App = () => {
 };
 
 const useApp = () => {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const q = searchParams.get("q");
+    if (q) {
+      return encodeURIComponent(q).split("-").join("\n");
+    }
+
+    return "";
+  });
   const [result, setResult] = useState("");
   const onChangeInput = useCallback(
     (e: any) => {
