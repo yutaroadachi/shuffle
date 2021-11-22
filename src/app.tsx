@@ -1,7 +1,9 @@
-import { useCallback, useState } from "preact/hooks";
+import copy from "copy-to-clipboard";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
 export const App = () => {
   const { input, onChangeInput, result, shuffle } = useApp();
+  const { hasCopied, onCopy } = useClipboard(result);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-purple-600">
@@ -50,8 +52,11 @@ export const App = () => {
           </div>
           <div className="flex justify-end mt-2">
             {result && (
-              <button className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300">
-                コピー
+              <button
+                onClick={onCopy}
+                className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300"
+              >
+                {hasCopied ? "コピーしました" : "コピー"}
               </button>
             )}
           </div>
@@ -97,4 +102,32 @@ const shuffleArray = <T extends any>(array: T[]) => {
   }
 
   return copiedArray;
+};
+
+/** @see https://github.com/chakra-ui/chakra-ui/blob/main/packages/hooks/src/use-clipboard.ts */
+const useClipboard = (text: string) => {
+  const [hasCopied, setHasCopied] = useState(false);
+
+  const onCopy = useCallback(() => {
+    const didCopy = copy(text);
+    setHasCopied(didCopy);
+  }, [text]);
+
+  useEffect(() => {
+    let timeoutId: number | null = null;
+
+    if (hasCopied) {
+      timeoutId = window.setTimeout(() => {
+        setHasCopied(false);
+      }, 1500);
+    }
+
+    return () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [hasCopied]);
+
+  return { value: text, hasCopied, onCopy };
 };
