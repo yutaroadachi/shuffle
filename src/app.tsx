@@ -104,21 +104,13 @@ const useApp = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const q = searchParams.get("q");
     if (q) {
-      const encodedQ = encodeURIComponent(q);
-
-      const initialInput = encodedQ.split("-").join("\n");
+      const initialInput = encodeURIComponent(q).split("-").join("\n");
       setInput(initialInput);
 
-      const url = window.location.href;
-      const initialUrlForCopy = `${url.replace(
-        window.location.search,
-        ""
-      )}?q=${encodedQ}`;
+      const initialUrlForCopy = buildUrlForCopy(initialInput);
       setUrlForCopy(initialUrlForCopy);
 
-      const initialInputArray = initialInput.split(/\r\n|\n/);
-      const shuffledArray = shuffleArray(initialInputArray);
-      const initialResult = shuffledArray.join("\n");
+      const initialResult = buildResult(initialInput);
       setResult(initialResult);
     }
   }, []);
@@ -131,19 +123,10 @@ const useApp = () => {
   );
   const shuffle = useCallback(
     (input: string) => {
-      const inputArray = input.split(/\r\n|\n/);
+      const urlForCopy = buildUrlForCopy(input);
+      setUrlForCopy(urlForCopy);
 
-      const q = inputArray.join("-");
-      if (q) {
-        const url = window.location.href;
-        const urlForCopy = `${url.replace(window.location.search, "")}?q=${q}`;
-        setUrlForCopy(urlForCopy);
-      } else {
-        setUrlForCopy("");
-      }
-
-      const shuffledArray = shuffleArray(inputArray);
-      const result = shuffledArray.join("\n");
+      const result = buildResult(input);
       setResult(result);
     },
     [setUrlForCopy, setResult]
@@ -151,6 +134,27 @@ const useApp = () => {
 
   return { input, urlForCopy, result, onChangeInput, shuffle };
 };
+
+const buildUrlForCopy = (input: string) => {
+  if (!input) return "";
+
+  const inputArray = inputStringToArray(input);
+  const url = window.location.href;
+  const q = inputArray.join("-");
+
+  return `${url.replace(window.location.search, "")}?q=${q}`;
+};
+
+const buildResult = (input: string) => {
+  if (!input) return "";
+
+  const inputArray = inputStringToArray(input);
+  const shuffledArray = shuffleArray(inputArray);
+
+  return shuffledArray.join("\n");
+};
+
+const inputStringToArray = (input: string) => input.split(/\n|\r\n/);
 
 /** @see https://qiita.com/pure-adachi/items/77fdf665ff6e5ea22128#%E3%83%80%E3%82%B9%E3%83%86%E3%83%B3%E3%83%95%E3%82%A7%E3%83%AB%E3%83%89%E3%81%AE%E6%89%8B%E6%B3%95 */
 const shuffleArray = <T extends any>(array: T[]) => {
