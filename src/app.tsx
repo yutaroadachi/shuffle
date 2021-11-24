@@ -104,8 +104,22 @@ const useApp = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const q = searchParams.get("q");
     if (q) {
-      const initialInput = encodeURIComponent(q).split("-").join("\n");
+      const encodedQ = encodeURIComponent(q);
+
+      const initialInput = encodedQ.split("-").join("\n");
       setInput(initialInput);
+
+      const url = window.location.href;
+      const initialUrlForCopy = `${url.replace(
+        window.location.search,
+        ""
+      )}?q=${encodedQ}`;
+      setUrlForCopy(initialUrlForCopy);
+
+      const initialInputArray = initialInput.split(/\r\n|\n/);
+      const shuffledArray = shuffleArray(initialInputArray);
+      const initialResult = shuffledArray.join("\n");
+      setResult(initialResult);
     }
   }, []);
 
