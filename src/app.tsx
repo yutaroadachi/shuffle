@@ -96,17 +96,19 @@ export const App = () => {
 };
 
 const useApp = () => {
-  const [input, setInput] = useState(() => {
+  const [input, setInput] = useState("");
+  const [urlForCopy, setUrlForCopy] = useState("");
+  const [result, setResult] = useState("");
+
+  useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const q = searchParams.get("q");
     if (q) {
-      return encodeURIComponent(q).split("-").join("\n");
+      const initialInput = encodeURIComponent(q).split("-").join("\n");
+      setInput(initialInput);
     }
+  }, []);
 
-    return "";
-  });
-  const [urlForCopy, setUrlForCopy] = useState("");
-  const [result, setResult] = useState("");
   const onChangeInput = useCallback(
     (e: any) => {
       setInput(e.target.value);
