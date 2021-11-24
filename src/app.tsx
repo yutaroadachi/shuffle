@@ -10,26 +10,26 @@ export const App = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-purple-600">
-      <header className="py-4">
+      <header className="pt-8">
         <h1 className="font-bold text-4xl text-center">
           <a href="/">Shuffle</a>
         </h1>
       </header>
       <main className="flex flex-col flex-grow">
-        <div className="w-full max-w-3xl py-8 mx-auto">
+        <div className="w-full max-w-3xl px-4 py-8 mx-auto">
           <div className="p-4 border-2 border-purple-600 rounded">
             <div className="font-bold">使い方</div>
             <ul className="list-disc list-inside text-sm mt-2 ml-4">
               <li>
-                左の入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
+                入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
               </li>
               <li>
                 <code>?q=hoge-huga</code>&nbsp;
-                のようなクエリパラメータ付きでURLを開くと初期値が設定されます（ハイフン区切り）
+                のようなハイフン区切りのクエリパラメータ付きでURLを開くと初期値が設定されます
               </li>
             </ul>
           </div>
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center mt-8">
             <div>
               <label for="input" className="font-bold">
                 入力
@@ -50,7 +50,7 @@ export const App = () => {
             >
               {result ? "再実行" : "実行"}
             </button>
-            <div className="text-right">
+            <div className="md:text-right">
               <label for="result" className="font-bold">
                 結果
               </label>
@@ -64,7 +64,7 @@ export const App = () => {
               />
             </div>
           </div>
-          <div className="flex justify-between mt-2">
+          <div className="md:flex md:justify-between mt-2">
             {urlForCopy && (
               <button
                 onClick={onCopyUrlForCopy}
@@ -75,6 +75,7 @@ export const App = () => {
                   : "この入力を初期値とするURLをコピー"}
               </button>
             )}
+            <br />
             {result && (
               <button
                 onClick={onCopyResult}
@@ -86,7 +87,7 @@ export const App = () => {
           </div>
         </div>
       </main>
-      <footer className="py-4">
+      <footer className="pb-8">
         <div className="text-center">
           Copyright© adachi All Rights Reserved.
         </div>
