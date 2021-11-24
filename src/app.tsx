@@ -2,8 +2,11 @@ import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useState } from "preact/hooks";
 
 export const App = () => {
-  const { input, onChangeInput, result, shuffle } = useApp();
-  const { hasCopied, onCopy } = useClipboard(result);
+  const { input, urlForCopy, result, onChangeInput, shuffle } = useApp();
+  const { hasCopied: hasCopiedUrlForCopy, onCopy: onCopyUrlForCopy } =
+    useClipboard(urlForCopy);
+  const { hasCopied: hasCopiedResult, onCopy: onCopyResult } =
+    useClipboard(result);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-purple-600">
@@ -61,13 +64,23 @@ export const App = () => {
               />
             </div>
           </div>
-          <div className="flex justify-end mt-2">
-            {result && (
+          <div className="flex justify-between mt-2">
+            {urlForCopy && (
               <button
-                onClick={onCopy}
+                onClick={onCopyUrlForCopy}
                 className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300"
               >
-                {hasCopied ? "コピーしました" : "コピー"}
+                {hasCopiedUrlForCopy
+                  ? "コピーしました"
+                  : "この入力を初期値とするURLをコピー"}
+              </button>
+            )}
+            {result && (
+              <button
+                onClick={onCopyResult}
+                className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300"
+              >
+                {hasCopiedResult ? "コピーしました" : "この結果をコピー"}
               </button>
             )}
           </div>
@@ -92,6 +105,7 @@ const useApp = () => {
 
     return "";
   });
+  const [urlForCopy, setUrlForCopy] = useState("");
   const [result, setResult] = useState("");
   const onChangeInput = useCallback(
     (e: any) => {
@@ -102,14 +116,24 @@ const useApp = () => {
   const shuffle = useCallback(
     (input: string) => {
       const inputArray = input.split(/\r\n|\n/);
+
+      const q = inputArray.join("-");
+      if (q) {
+        const url = window.location.href;
+        const urlForCopy = `${url.replace(window.location.search, "")}?q=${q}`;
+        setUrlForCopy(urlForCopy);
+      } else {
+        setUrlForCopy("");
+      }
+
       const shuffledArray = shuffleArray(inputArray);
       const result = shuffledArray.join("\n");
       setResult(result);
     },
-    [setResult]
+    [setUrlForCopy, setResult]
   );
 
-  return { input, onChangeInput, result, shuffle };
+  return { input, urlForCopy, result, onChangeInput, shuffle };
 };
 
 /** @see https://qiita.com/pure-adachi/items/77fdf665ff6e5ea22128#%E3%83%80%E3%82%B9%E3%83%86%E3%83%B3%E3%83%95%E3%82%A7%E3%83%AB%E3%83%89%E3%81%AE%E6%89%8B%E6%B3%95 */
