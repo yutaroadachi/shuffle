@@ -2,31 +2,34 @@ import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useState } from "preact/hooks";
 
 export const App = () => {
-  const { input, onChangeInput, result, shuffle } = useApp();
-  const { hasCopied, onCopy } = useClipboard(result);
+  const { input, urlForCopy, result, onChangeInput, shuffle } = useApp();
+  const { hasCopied: hasCopiedUrlForCopy, onCopy: onCopyUrlForCopy } =
+    useClipboard(urlForCopy);
+  const { hasCopied: hasCopiedResult, onCopy: onCopyResult } =
+    useClipboard(result);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-purple-600">
-      <header className="py-4">
+      <header className="pt-8">
         <h1 className="font-bold text-4xl text-center">
           <a href="/">Shuffle</a>
         </h1>
       </header>
       <main className="flex flex-col flex-grow">
-        <div className="w-full max-w-3xl py-8 mx-auto">
+        <div className="w-full max-w-3xl px-4 py-8 mx-auto">
           <div className="p-4 border-2 border-purple-600 rounded">
             <div className="font-bold">使い方</div>
             <ul className="list-disc list-inside text-sm mt-2 ml-4">
               <li>
-                左の入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
+                入力欄にシャッフルしたい文字列を改行区切りで入力して実行ボタンを押してください
               </li>
               <li>
                 <code>?q=hoge-huga</code>&nbsp;
-                のようなクエリパラメータ付きでURLを開くと初期値が設定されます（ハイフン区切り）
+                のようなハイフン区切りのクエリパラメータ付きでURLを開くと初期値が設定されます
               </li>
             </ul>
           </div>
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center mt-8">
             <div>
               <label for="input" className="font-bold">
                 入力
@@ -47,7 +50,7 @@ export const App = () => {
             >
               {result ? "再実行" : "実行"}
             </button>
-            <div className="text-right">
+            <div className="md:text-right">
               <label for="result" className="font-bold">
                 結果
               </label>
@@ -61,19 +64,30 @@ export const App = () => {
               />
             </div>
           </div>
-          <div className="flex justify-end mt-2">
-            {result && (
+          <div className="md:flex md:justify-between mt-2">
+            {urlForCopy && (
               <button
-                onClick={onCopy}
+                onClick={onCopyUrlForCopy}
                 className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300"
               >
-                {hasCopied ? "コピーしました" : "コピー"}
+                {hasCopiedUrlForCopy
+                  ? "コピーしました"
+                  : "この入力を初期値とするURLをコピー"}
+              </button>
+            )}
+            <br />
+            {result && (
+              <button
+                onClick={onCopyResult}
+                className="text-sm text-purple-600 hover:text-purple-300 border-b border-purple-600 hover:border-purple-300"
+              >
+                {hasCopiedResult ? "コピーしました" : "この結果をコピー"}
               </button>
             )}
           </div>
         </div>
       </main>
-      <footer className="py-4">
+      <footer className="pb-8">
         <div className="text-center">
           Copyright© adachi All Rights Reserved.
         </div>
@@ -83,16 +97,25 @@ export const App = () => {
 };
 
 const useApp = () => {
-  const [input, setInput] = useState(() => {
+  const [input, setInput] = useState("");
+  const [urlForCopy, setUrlForCopy] = useState("");
+  const [result, setResult] = useState("");
+
+  useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const q = searchParams.get("q");
     if (q) {
-      return encodeURIComponent(q).split("-").join("\n");
-    }
+      const initialInput = encodeURIComponent(q).split("-").join("\n");
+      setInput(initialInput);
 
-    return "";
-  });
-  const [result, setResult] = useState("");
+      const initialUrlForCopy = buildUrlForCopy(initialInput);
+      setUrlForCopy(initialUrlForCopy);
+
+      const initialResult = buildResult(initialInput);
+      setResult(initialResult);
+    }
+  }, []);
+
   const onChangeInput = useCallback(
     (e: any) => {
       setInput(e.target.value);
@@ -101,16 +124,38 @@ const useApp = () => {
   );
   const shuffle = useCallback(
     (input: string) => {
-      const inputArray = input.split(/\r\n|\n/);
-      const shuffledArray = shuffleArray(inputArray);
-      const result = shuffledArray.join("\n");
+      const urlForCopy = buildUrlForCopy(input);
+      setUrlForCopy(urlForCopy);
+
+      const result = buildResult(input);
       setResult(result);
     },
-    [setResult]
+    [setUrlForCopy, setResult]
   );
 
-  return { input, onChangeInput, result, shuffle };
+  return { input, urlForCopy, result, onChangeInput, shuffle };
 };
+
+const buildUrlForCopy = (input: string) => {
+  if (!input) return "";
+
+  const inputArray = inputStringToArray(input);
+  const url = window.location.href;
+  const q = inputArray.join("-");
+
+  return `${url.replace(window.location.search, "")}?q=${q}`;
+};
+
+const buildResult = (input: string) => {
+  if (!input) return "";
+
+  const inputArray = inputStringToArray(input);
+  const shuffledArray = shuffleArray(inputArray);
+
+  return shuffledArray.join("\n");
+};
+
+const inputStringToArray = (input: string) => input.split(/\n|\r\n/);
 
 /** @see https://qiita.com/pure-adachi/items/77fdf665ff6e5ea22128#%E3%83%80%E3%82%B9%E3%83%86%E3%83%B3%E3%83%95%E3%82%A7%E3%83%AB%E3%83%89%E3%81%AE%E6%89%8B%E6%B3%95 */
 const shuffleArray = <T extends any>(array: T[]) => {
