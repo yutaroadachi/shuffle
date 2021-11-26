@@ -105,7 +105,7 @@ const useApp = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const q = searchParams.get("q");
     if (q) {
-      const initialInput = encodeURIComponent(q).split("-").join("\n");
+      const initialInput = q.split("-").join("\n");
       setInput(initialInput);
 
       const initialUrlForCopy = buildUrlForCopy(initialInput);
