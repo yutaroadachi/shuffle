@@ -140,10 +140,12 @@ const buildUrlForCopy = (input: string) => {
   if (!input) return "";
 
   const inputArray = inputStringToArray(input);
-  const url = window.location.href;
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
   const q = inputArray.join("-");
 
-  return `${url.replace(window.location.search, "")}?q=${q}`;
+  return `${url.href}?q=${q}`;
 };
 
 const buildResult = (input: string) => {
